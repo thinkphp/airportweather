@@ -1,0 +1,132 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+   <meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
+   <title>Turning a web folder with data into an API using YQL Execute</title>
+   <link rel="stylesheet" href="http://yui.yahooapis.com/2.7.0/build/reset-fonts-grids/reset-fonts-grids.css" type="text/css">
+   <link rel="stylesheet" href="http://yui.yahooapis.com/2.7.0/build/base/base.css" type="text/css">
+   <style type="text/css">
+    html,body{font-family: calibri "arial rounded mt bold","lucida grande",arial,sans-serif;background: #6387B3}
+    #doc2{background:#f8f8f8;border:1em solid #f8f8f8;-moz-border-radius:10px;-webkit-border-radius: 10px;border-radius: 10px}
+    h1{font-size:200%;margin:10px 0;color: #fff;text-transform:capitalize;text-align: left;margin-left:20px}
+    label[for=airport]{font-size: 40px}
+    input{border: 1px solid #ccc;color: #000;font-size: 40px;padding: 10px;margin: 10px;text-align: center;-moz-border-radius:10px;-webkit-border-radius: 10px;border-radius: 10px}
+    input:focus{background: #D2E5FF}
+    .valid{color: lightgreen;font-size: 20px}
+    .invalid{color: red;font-size: 20px}
+    #results{width: 400px;margin-left: 120px}
+    #ft {margin:3em 0 1em 0;color:#ccc;}
+    #ft a{color:#ccc;}
+   </style>
+</head>
+<body>
+   <div id="hd" role="banner"><h1>Gets the weather forecast for airports in taf or metar format</h1></div>
+<div id="doc2" class="yui-t7">
+   <div id="bd" role="main">
+	<div class="yui-g">
+        <p><label for="airport">airport</label><input type="text" id="airport" name="airport" /><input type="button" name="solve" id="solve" value="run"></p>
+        <p><label for="taf">taf</label><input type="radio" name="group" value="taf" id="taf" />
+        <label for="metar">metar</label><input type="radio" name="group" value="metar" id="metar" /></p>
+        <p><div id="results"></div></p>
+	</div>
+   </div>
+<div id="ft" role="contentinfo"><p>Written By Adrian Statescu using <a href="http://weather.noaa.gov/pub/data/forecasts/taf/stations/">taf</a> | <a href="http://weather.noaa.gov/pub/data/observations/metar/stations/">metar</a> | <a href="http://www.alaska.faa.gov/fai/afss/metar%20taf/metintro.htm">Abbreviations</a> | <a href="../airportweather.xml">Open Data Table</a></p></div></div>
+<script type="text/javascript" src="ajax.js"></script>
+<script type="text/javascript" src="dom.js"></script>
+<script type="text/javascript">
+        //show me love to the singleton
+        var airport = function(){
+
+            /* configuration */
+            var config = {
+
+                //define id for zone output
+                outputID: 'output',
+
+                //define id for zone input
+                inputID: 'airport',
+
+                //define id for button solve
+                buttID: 'solve' 
+            }; 
+
+            /* initialization */
+            function init(o) {
+
+                 if(o && o.outputID) {
+
+                    config.outputID = o.outputID; 
+                 }
+
+                 if(o && o.inputID) {
+
+                    config.inputID = o.inputID; 
+                 }
+
+                 if(o && o.buttID) {
+
+                    config.buttID = o.buttID; 
+                 }
+
+                 var butt = DOMhelp.$(config.buttID);
+
+                 if(!butt){return;}
+
+                 DOMhelp.addEvent(butt,'click',handleClick,false);
+
+            };//end function
+
+            /* handler for event click button */
+            function handleClick(e) {
+
+                 var airport = DOMhelp.$(config.inputID).value;
+
+                 if(airport === "") {DOMhelp.$(config.inputID).style.border = '1px solid #c00';return;}
+
+                            else {DOMhelp.$(config.inputID).style.border = '1px solid #ccc';}
+
+                 var type = getValue(document.getElementsByName('group'));
+
+                 if(type !== null) {
+
+                    DOMhelp.$(config.outputID).innerHTML = 'Loading...';
+
+                    var URL = 'getweather.php?' + 'airport=' + airport + '&type='+ type +'&sid=' + Math.random();
+
+                    asyncRequest.REQUEST('GET',URL,handleResponse);
+                 }
+
+            };//end function
+
+            /* get value from input radio checked */
+            function getValue(ObjName) {
+
+                     var all = ObjName.length;
+
+                     for(var i=0;i<all;i++) {
+
+                           if(ObjName[i].checked) {
+
+                                return ObjName[i].value;  
+                           }
+                     } 
+
+                 return null;
+            }
+
+            /* procces response from server */
+            function handleResponse(resp) {
+
+                  DOMhelp.$(config.outputID).innerHTML = resp;
+            } 
+
+  //return an object with private methods revealed
+  return {init: init}; 
+  
+}();//do Exec
+
+airport.init({inputID: 'airport',outputID: 'results'});
+  
+</script>
+</body>
+</html>
